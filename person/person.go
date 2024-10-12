@@ -2,22 +2,45 @@ package person
 
 import (
 	"app/pkg"
+	"errors"
 )
 
-type Person struct {
-	Name pkg.NonEmptyString
-	Age  pkg.PositiveInt
+type person struct {
+	name pkg.NonEmptyString
+	age  pkg.PositiveInt
 }
 
-type ValidPerson pkg.Invariant[Person]
+type ValidPerson interface {
+	GetName() string
+	GetAge() int
 
-func New(p Person) (ValidPerson, error) {
-	return pkg.TryNew(p, []pkg.Condition[Person]{
-		func(p Person) bool {
-			return pkg.Inited(p.Name)
-		},
-		func(p Person) bool {
-			return pkg.Inited(p.Age)
-		},
-	})
+	self() *person
+}
+
+func New(name string, age int) (ValidPerson, error) {
+	nonEmptyName, err := pkg.TryNewNonEmptyString(name)
+	if err != nil {
+		return nil, errors.New("")
+	}
+	positiveAge, err := pkg.TryNewPositiveInt(age)
+	if err != nil {
+		return nil, errors.New("")
+	}
+
+	return &person{
+		name: nonEmptyName,
+		age:  positiveAge,
+	}, nil
+}
+
+func (p *person) GetName() string {
+	return pkg.Unwrap(p.name)
+}
+
+func (p *person) GetAge() int {
+	return pkg.Unwrap(p.age)
+}
+
+func (p *person) self() *person {
+	return p
 }

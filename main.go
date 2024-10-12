@@ -2,20 +2,15 @@ package main
 
 import (
 	"app/person"
-	"app/pkg"
 	"fmt"
 )
 
 func main() {
-	p, err := person.New(person.Person{
-		Name: pkg.NewNonEmptyString("Oleg"),
-		Age:  pkg.NewPositiveInt(36),
-	})
+	p, err := person.New("Simon", 29)
 	if err != nil {
 		panic(err)
 	}
 
-	originalPerson := pkg.Unwrap(p)
-
-	fmt.Println(pkg.Unwrap(originalPerson.Name))
+	fmt.Printf("name is %s\n", p.GetName())
+	fmt.Printf("age is %d\n", p.GetAge())
 }
