@@ -1,4 +1,4 @@
-package goinvar
+package invar
 
 import (
 	"errors"
