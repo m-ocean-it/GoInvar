@@ -5,42 +5,27 @@ import (
 	"errors"
 )
 
-type person struct {
-	name pkg.NonEmptyString
-	age  pkg.PositiveInt
+type Person struct {
+	Name pkg.NonEmptyString
+	Age  pkg.PositiveInt
 }
 
-type ValidPerson interface {
-	GetName() string
-	GetAge() int
-
-	self() *person
-}
+type ValidPerson pkg.Invariant[Person]
 
 func New(name string, age int) (ValidPerson, error) {
 	nonEmptyName, err := pkg.TryNewNonEmptyString(name)
 	if err != nil {
-		return nil, errors.New("")
+		return nil, errors.New("name is invalid")
 	}
 	positiveAge, err := pkg.TryNewPositiveInt(age)
 	if err != nil {
-		return nil, errors.New("")
+		return nil, errors.New("age is invalid")
 	}
 
-	return &person{
-		name: nonEmptyName,
-		age:  positiveAge,
-	}, nil
-}
+	p := Person{Name: nonEmptyName, Age: positiveAge}
 
-func (p *person) GetName() string {
-	return pkg.Unwrap(p.name)
-}
-
-func (p *person) GetAge() int {
-	return pkg.Unwrap(p.age)
-}
-
-func (p *person) self() *person {
-	return p
+	return pkg.TryNew(p, []pkg.Condition[Person]{
+		func(p Person) bool { return pkg.Inited(p.Name) },
+		func(p Person) bool { return pkg.Inited(p.Age) },
+	})
 }
