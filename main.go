@@ -15,10 +15,20 @@ func main() {
 		panic(err)
 	}
 
-	n, err := positiveInt.Int()
+	n, err := positiveInt.Get()
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println(n)
+
+	var x pkg.PositiveInt
+	fmt.Println(x)
+
+	y, err := x.Get()
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(y)
 }
