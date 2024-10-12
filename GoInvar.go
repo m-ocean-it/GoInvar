@@ -5,6 +5,10 @@ import (
 	"fmt"
 )
 
+var (
+	ErrInvariantNotHolding = errors.New("invariant does not hold up")
+)
+
 type InvariantsHolder[T any] interface {
 	get() T
 }
@@ -19,21 +23,24 @@ type Invariant[T any] struct {
 }
 
 func New[T any](val T, invariants []Invariant[T]) *invariantsHolder[T] {
-	_ = checkValInvariants(val, invariants, true)
+	err := checkValInvariants(val, invariants)
+	if err != nil {
+		panic(err)
+	}
 
 	return &invariantsHolder[T]{internal: val}
 }
 
 func TryNew[T any](val T, invariants []Invariant[T]) (*invariantsHolder[T], error) {
-	err := checkValInvariants(val, invariants, false)
+	err := checkValInvariants(val, invariants)
 	if err != nil {
-		return nil, fmt.Errorf("could not construct invariants holder: %w", err)
+		return nil, err
 	}
 
 	return &invariantsHolder[T]{internal: val}, nil
 }
 
-func checkValInvariants[T any](val T, invariants []Invariant[T], panicOnErr bool) error {
+func checkValInvariants[T any](val T, invariants []Invariant[T]) error {
 	for i, inv := range invariants {
 		if inv.Check(val) {
 			continue
@@ -44,13 +51,7 @@ func checkValInvariants[T any](val T, invariants []Invariant[T], panicOnErr bool
 			invName = fmt.Sprintf("#%d", i)
 		}
 
-		err := fmt.Errorf("invariant '%s' does not hold up", invName)
-
-		if panicOnErr {
-			panic(err)
-		}
-
-		return err
+		return getInvariantError(invName)
 	}
 
 	return nil
@@ -75,4 +76,8 @@ func TryUnwrap[T any](holder InvariantsHolder[T]) (T, error) {
 
 func Inited[T any](holder InvariantsHolder[T]) bool {
 	return holder != nil
+}
+
+func getInvariantError(invariantName string) error {
+	return fmt.Errorf("%w ('%s')", ErrInvariantNotHolding, invariantName)
 }
