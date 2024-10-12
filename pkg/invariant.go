@@ -37,3 +37,7 @@ func Get[T any](inv Invariant[T]) (T, error) {
 
 	return inv.get(), nil
 }
+
+func Inited[T any](inv Invariant[T]) bool {
+	return inv != nil
+}

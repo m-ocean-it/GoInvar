@@ -19,3 +19,13 @@ func NewPositiveInt(n int) (PositiveInt, error) {
 		},
 	})
 }
+
+type NonEmptyString Invariant[string]
+
+func NewNonEmptyString(s string) (NonEmptyString, error) {
+	return NewInvariant(s, []Condition[string]{
+		func(s string) bool {
+			return len(s) > 0
+		},
+	})
+}

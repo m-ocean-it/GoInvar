@@ -5,10 +5,6 @@ import (
 	"fmt"
 )
 
-type data struct {
-	n pkg.PositiveInt
-}
-
 func main() {
 	positiveInt, err := pkg.NewPositiveInt(2)
 	if err != nil {
@@ -22,16 +18,15 @@ func main() {
 
 	fmt.Println(n)
 
-	var x pkg.PositiveInt
-	x, err = pkg.NewPositiveInt(3)
+	nes, err := pkg.NewNonEmptyString("hello")
 	if err != nil {
 		panic(err)
 	}
 
-	y, err := pkg.Get(x)
+	s, err := pkg.Get(nes)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Println(y)
+	fmt.Println(s)
 }
