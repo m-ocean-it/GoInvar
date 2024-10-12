@@ -23,6 +23,10 @@ func main() {
 	fmt.Println(n)
 
 	var x pkg.PositiveInt
+	x, err = pkg.NewPositiveInt(3)
+	if err != nil {
+		panic(err)
+	}
 
 	y, err := pkg.Get(x)
 	if err != nil {
