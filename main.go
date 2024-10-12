@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	n, err := positiveInt.Get()
+	n, err := pkg.Get(positiveInt)
 	if err != nil {
 		panic(err)
 	}
@@ -23,9 +23,8 @@ func main() {
 	fmt.Println(n)
 
 	var x pkg.PositiveInt
-	fmt.Println(x)
 
-	y, err := x.Get()
+	y, err := pkg.Get(x)
 	if err != nil {
 		panic(err)
 	}
