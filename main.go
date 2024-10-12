@@ -17,5 +17,5 @@ func main() {
 
 	originalPerson := pkg.Unwrap(p)
 
-	fmt.Println(originalPerson.Name)
+	fmt.Println(pkg.Unwrap(originalPerson.Name))
 }
