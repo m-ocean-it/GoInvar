@@ -2,6 +2,7 @@ package invar
 
 type InvariantsHolder[T any] interface {
 	get() (T, error)
+	check() error
 }
 
 type invariantsHolder[T any] struct {
@@ -31,11 +32,20 @@ func TryNew[T any](val T, invariants []Invariant[T]) (*invariantsHolder[T], erro
 }
 
 func (ih *invariantsHolder[T]) get() (T, error) {
-	err := checkValInvariants(ih.internal, ih.invariants)
+	err := ih.check()
 	if err != nil {
 		var zero T
 		return zero, err
 	}
 
 	return ih.internal, nil
+}
+
+func (ih *invariantsHolder[T]) check() error {
+	err := checkValInvariants(ih.internal, ih.invariants)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

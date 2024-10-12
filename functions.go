@@ -5,11 +5,11 @@ import (
 	"fmt"
 )
 
-var ErrCannotUnwrapNilVariantsHolder = errors.New("cannot unwrap a nil invariants holder")
+var ErrNilInvariantHolder = errors.New("invariant holder is nil")
 
 func Unwrap[T any](holder InvariantsHolder[T]) T {
 	if holder == nil {
-		panic(ErrCannotUnwrapNilVariantsHolder)
+		panic(ErrNilInvariantHolder)
 	}
 
 	val, err := holder.get()
@@ -23,7 +23,7 @@ func Unwrap[T any](holder InvariantsHolder[T]) T {
 func TryUnwrap[T any](holder InvariantsHolder[T]) (T, error) {
 	if holder == nil {
 		var zero T
-		return zero, ErrCannotUnwrapNilVariantsHolder
+		return zero, ErrNilInvariantHolder
 	}
 
 	val, err := holder.get()
@@ -33,4 +33,12 @@ func TryUnwrap[T any](holder InvariantsHolder[T]) (T, error) {
 	}
 
 	return val, nil
+}
+
+func Check[T any](holder InvariantsHolder[T]) error {
+	if holder == nil {
+		return ErrNilInvariantHolder
+	}
+
+	return holder.check()
 }
