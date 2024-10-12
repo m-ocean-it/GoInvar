@@ -5,53 +5,74 @@ import (
 	"fmt"
 )
 
-type Invariant[T any] interface {
+type InvariantsHolder[T any] interface {
 	get() T
 }
 
-type invariant[T any] struct {
+type invariantsHolder[T any] struct {
 	internal T
 }
 
-type Condition[T any] func(T) bool
+type Invariant[T any] struct {
+	Name  string
+	Check func(T) bool
+}
 
-func New[T any](val T, conditions []Condition[T]) *invariant[T] {
-	for i, cond := range conditions {
-		if !cond(val) {
-			panic(fmt.Errorf("condition #%d does not hold up", i))
-		}
+func New[T any](val T, invariants []Invariant[T]) *invariantsHolder[T] {
+	_ = checkValInvariants(val, invariants, true)
+
+	return &invariantsHolder[T]{internal: val}
+}
+
+func TryNew[T any](val T, invariants []Invariant[T]) (*invariantsHolder[T], error) {
+	err := checkValInvariants(val, invariants, false)
+	if err != nil {
+		return nil, fmt.Errorf("could not construct invariants holder: %w", err)
 	}
 
-	return &invariant[T]{internal: val}
+	return &invariantsHolder[T]{internal: val}, nil
 }
 
-func TryNew[T any](val T, conditions []Condition[T]) (*invariant[T], error) {
-	for i, cond := range conditions {
-		if !cond(val) {
-			return nil, fmt.Errorf("condition #%d does not hold up", i)
+func checkValInvariants[T any](val T, invariants []Invariant[T], panicOnErr bool) error {
+	for i, inv := range invariants {
+		if inv.Check(val) {
+			continue
 		}
+
+		invName := inv.Name
+		if invName == "" {
+			invName = fmt.Sprintf("#%d", i)
+		}
+
+		err := fmt.Errorf("invariant '%s' does not hold up", invName)
+
+		if panicOnErr {
+			panic(err)
+		}
+
+		return err
 	}
 
-	return &invariant[T]{internal: val}, nil
+	return nil
 }
 
-func (inv *invariant[T]) get() T {
-	return inv.internal
+func (holder *invariantsHolder[T]) get() T {
+	return holder.internal
 }
 
-func Unwrap[T any](inv Invariant[T]) T {
-	return inv.get()
+func Unwrap[T any](holder InvariantsHolder[T]) T {
+	return holder.get()
 }
 
-func TryUnwrap[T any](inv Invariant[T]) (T, error) {
-	if inv == nil {
+func TryUnwrap[T any](holder InvariantsHolder[T]) (T, error) {
+	if holder == nil {
 		var zero T
 		return zero, errors.New("invariant was not initialized")
 	}
 
-	return inv.get(), nil
+	return holder.get(), nil
 }
 
-func Inited[T any](inv Invariant[T]) bool {
-	return inv != nil
+func Inited[T any](holder InvariantsHolder[T]) bool {
+	return holder != nil
 }
