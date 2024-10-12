@@ -1,32 +1,21 @@
 package main
 
 import (
+	"app/person"
 	"app/pkg"
 	"fmt"
 )
 
 func main() {
-	positiveInt, err := pkg.NewPositiveInt(2)
+	p, err := person.New(person.Person{
+		Name: pkg.NewNonEmptyString("Oleg"),
+		Age:  pkg.NewPositiveInt(36),
+	})
 	if err != nil {
 		panic(err)
 	}
 
-	n, err := pkg.Get(positiveInt)
-	if err != nil {
-		panic(err)
-	}
+	originalPerson := pkg.Unwrap(p)
 
-	fmt.Println(n)
-
-	nes, err := pkg.NewNonEmptyString("hello")
-	if err != nil {
-		panic(err)
-	}
-
-	s, err := pkg.Get(nes)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(s)
+	fmt.Println(originalPerson.Name)
 }

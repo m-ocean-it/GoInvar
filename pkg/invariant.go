@@ -15,7 +15,17 @@ type invariant[T any] struct {
 
 type Condition[T any] func(T) bool
 
-func NewInvariant[T any](val T, conditions []Condition[T]) (*invariant[T], error) {
+func New[T any](val T, conditions []Condition[T]) *invariant[T] {
+	for i, cond := range conditions {
+		if !cond(val) {
+			panic(fmt.Errorf("condition #%d does not hold up", i))
+		}
+	}
+
+	return &invariant[T]{internal: val}
+}
+
+func TryNew[T any](val T, conditions []Condition[T]) (*invariant[T], error) {
 	for i, cond := range conditions {
 		if !cond(val) {
 			return nil, fmt.Errorf("condition #%d does not hold up", i)
@@ -29,7 +39,11 @@ func (inv *invariant[T]) get() T {
 	return inv.internal
 }
 
-func Get[T any](inv Invariant[T]) (T, error) {
+func Unwrap[T any](inv Invariant[T]) T {
+	return inv.get()
+}
+
+func TryUnwrap[T any](inv Invariant[T]) (T, error) {
 	if inv == nil {
 		var zero T
 		return zero, errors.New("invariant was not initialized")

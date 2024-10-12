@@ -1,21 +1,23 @@
 package person
 
-import "app/pkg"
+import (
+	"app/pkg"
+)
 
-type person struct {
-	name pkg.NonEmptyString
-	age  pkg.PositiveInt
+type Person struct {
+	Name pkg.NonEmptyString
+	Age  pkg.PositiveInt
 }
 
-type Person pkg.Invariant[person]
+type ValidPerson pkg.Invariant[Person]
 
-func NewPerson(p person) (Person, error) {
-	return pkg.NewInvariant(p, []pkg.Condition[person]{
-		func(p person) bool {
-			return pkg.Inited(p.name)
+func New(p Person) (ValidPerson, error) {
+	return pkg.TryNew(p, []pkg.Condition[Person]{
+		func(p Person) bool {
+			return pkg.Inited(p.Name)
 		},
-		func(p person) bool {
-			return pkg.Inited(p.age)
+		func(p Person) bool {
+			return pkg.Inited(p.Age)
 		},
 	})
 }
