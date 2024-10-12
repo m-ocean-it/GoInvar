@@ -11,14 +11,14 @@ type invariant[T any] struct {
 	internal T
 }
 
-func NewInvariant[T any](val T, conditions []func(T) bool) (invariant[T], error) {
+func NewInvariant[T any](val T, conditions []func(T) bool) (*invariant[T], error) {
 	for _, cond := range conditions {
 		if !cond(val) {
-			return invariant[T]{}, errors.New("wrong val")
+			return nil, errors.New("wrong val")
 		}
 	}
 
-	return invariant[T]{internal: val}, nil
+	return &invariant[T]{internal: val}, nil
 }
 
 func (inv *invariant[T]) Get() (T, error) {
