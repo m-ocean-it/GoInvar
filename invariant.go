@@ -11,12 +11,13 @@ var (
 
 type Invariant[T any] struct {
 	Name  string
-	Check func(T) bool
+	Check func(T) error
 }
 
 func checkValInvariants[T any](val T, invariants []Invariant[T]) error {
 	for i, inv := range invariants {
-		if inv.Check(val) {
+		err := inv.Check(val)
+		if err == nil { // all fine
 			continue
 		}
 
@@ -25,12 +26,12 @@ func checkValInvariants[T any](val T, invariants []Invariant[T]) error {
 			invName = fmt.Sprintf("#%d", i)
 		}
 
-		return getInvariantError(invName)
+		return getInvariantError(invName, err)
 	}
 
 	return nil
 }
 
-func getInvariantError(invariantName string) error {
-	return fmt.Errorf("%w ('%s')", ErrInvariantNotHolding, invariantName)
+func getInvariantError(invariantName string, err error) error {
+	return fmt.Errorf("%w: invariant '%s' fails with error: %w", ErrInvariantNotHolding, invariantName, err)
 }
