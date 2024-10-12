@@ -42,3 +42,11 @@ func Check[T any](holder InvariantsHolder[T]) error {
 
 	return holder.check()
 }
+
+func NamedCheck[T any](name string, holder InvariantsHolder[T]) error {
+	if err := Check(holder); err != nil {
+		return fmt.Errorf("check '%s' failed: %w", name, err)
+	}
+
+	return nil
+}
