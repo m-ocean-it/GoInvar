@@ -1,8 +1,9 @@
 package person
 
 import (
-	"app/pkg"
 	"errors"
+
+	"github.com/m-ocean-it/GoInvar/pkg"
 )
 
 type Person struct {

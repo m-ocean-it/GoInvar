@@ -1,9 +1,9 @@
 package main
 
 import (
-	"app/person"
-	"app/pkg"
 	"fmt"
+	"github.com/m-ocean-it/GoInvar/person"
+	"github.com/m-ocean-it/GoInvar/pkg"
 )
 
 func main() {
