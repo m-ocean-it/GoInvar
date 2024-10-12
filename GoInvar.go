@@ -10,11 +10,12 @@ var (
 )
 
 type InvariantsHolder[T any] interface {
-	get() T
+	get() (T, error)
 }
 
 type invariantsHolder[T any] struct {
-	internal T
+	internal   T
+	invariants []Invariant[T]
 }
 
 type Invariant[T any] struct {
@@ -28,7 +29,10 @@ func New[T any](val T, invariants []Invariant[T]) *invariantsHolder[T] {
 		panic(err)
 	}
 
-	return &invariantsHolder[T]{internal: val}
+	return &invariantsHolder[T]{
+		internal:   val,
+		invariants: invariants,
+	}
 }
 
 func TryNew[T any](val T, invariants []Invariant[T]) (*invariantsHolder[T], error) {
@@ -57,21 +61,33 @@ func checkValInvariants[T any](val T, invariants []Invariant[T]) error {
 	return nil
 }
 
-func (holder *invariantsHolder[T]) get() T {
-	return holder.internal
+func (ih *invariantsHolder[T]) get() (T, error) {
+	err := checkValInvariants(ih.internal, ih.invariants)
+	if err != nil {
+		var zero T
+		return zero, err
+	}
+
+	return ih.internal, nil
 }
 
 func Unwrap[T any](holder InvariantsHolder[T]) T {
-	return holder.get()
+	val, err := holder.get()
+	if err != nil {
+		panic(err)
+	}
+
+	return val
 }
 
 func TryUnwrap[T any](holder InvariantsHolder[T]) (T, error) {
-	if holder == nil {
+	val, err := holder.get()
+	if err != nil {
 		var zero T
-		return zero, errors.New("invariant was not initialized")
+		return zero, fmt.Errorf("error unwrapping invariant holder: %w", err)
 	}
 
-	return holder.get(), nil
+	return val, nil
 }
 
 func Inited[T any](holder InvariantsHolder[T]) bool {
